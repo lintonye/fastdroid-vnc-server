@@ -1,0 +1,26 @@
+INSTRUCTION
+============
+
+Add the following to kernel/drivers/input/keyboard/Kconfig
+
+---8<-----------------------8<----------------------8<------
+
+config KEYBOARD_VNC
+	tristate "VNC keyboard driver"
+	default y
+	help
+	  Say Y here to enable the VNC keyboard driver for Android VNC
+	  server.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called vnckbd.
+
+config KEYBOARD_VNC_SELF
+	bool "VNC keyboard input device"
+	depends on KEYBOARD_VNC
+	default y
+	help
+	  Say Y here to create an input device for the VNC keyboard. If
+	  the VNC keyboard is not initialized in the platform board file, then
+	  this option needs to be enabled to activate the VNC keyboard for the
+	  VNC server.

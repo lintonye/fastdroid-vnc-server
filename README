@@ -1,0 +1,88 @@
+VNC server for Android
+======================
+
+fastdroid-vnc - a fast Android VNC server based on libvncserver.  
+
+Started with original fbvncserver for the iPAQ and Zaurus.
+	http://fbvncserver.sourceforge.net/
+
+Modified by Jim Huang <jserv.tw@gmail.com>
+	- Simplified and sizing down
+	- Performance tweaks
+
+Modified by Steve Guo (letsgoustc)
+ 	- Added keyboard/pointer input
+
+Modified by Danke Xie (danke.xie@gmail.com)
+	- Added input device search to support different devices
+	- Added kernel vnckbd driver to allow full-keyboard input on 12-key hw
+	- Supports Android framebuffer double buffering
+	- Performance boost and fix GCC warnings in libvncserver-0.9.7
+
+ANDROID INSTALL
+===============
+
+Copy the directory fastdroid-vnc to any Android build directory, run
+a build command from Android root
+  $ make -j4 fastdroid-vnc
+
+Push the binary to the device
+  $ adb push system/bin/fastdroid-vnc /data/
+  
+Modify file permission and run
+  $ adb shell
+  # cd /data
+  # chmod 777 fastdroid-vnc
+  # ./fastdroid-vnc
+  
+
+LINUX BUILD
+===========
+To make a linux build, one can use the linux Makefile instead of the above
+Android steps, and the Android makefile Android.mk.
+
+Run make under the fastdroid-vnc directory
+  $ make
+
+The executable file fastdroid-vnc will be in the same directory.
+
+
+INPUT DEVICE CONFIGURATION
+==========================
+
+This version of the VNC server can forward input events from the remote VNC viewer 
+to Android framework (based on Steve Guo's work). The way it works is converting 
+remote VNC inputs to Linux input events and send to the input devices /dev/input/event<N>. 
+
+The input devices used are the keyboard and the touchscreen. Each input device has 
+a specific <N> value. The server can automatically detect the <N> value based on the 
+name string of the device. Upon execution, it enumerates the input devices under 
+/device/input/event<N>, and select the device whose name matches the keywords in 
+fbvncserver.c. For example, they keywords are
+
+static const char *KBD_PATTERNS[] = {"VNC", "key", "qwerty", NULL};
+static const char *TOUCH_PATTERNS[] = {"touch", "qwerty", NULL};
+
+If an input device contains the strings in KBD_PATTERNS, it will be used to support
+keyboard events. The same is true for the touchscreen device with the keyword
+strings in TOUCH_PATTERNS. If more than one devices match, then the one matching the 
+left-most pattern is used.
+
+If a matching device is not found, then some default input devices will be used. The
+user can also specify the keyboard and touchpad devices by the command line:
+	
+	-k <keyboard-device-path>
+	-t <touchscreen-device-path>
+
+To determine which input device is the keyboard/touchscreen, one may make use of the 
+information in /proc/bus/input/devices.
+
+PERFORMANCE ENHANCEMENT
+=======================
+
+This VNC server is based on libvncserver 0.9.7, but several optimizations
+are made in the server to improve the response time to VNC clients, and 
+reduced background activity when there is no active clients.
+
+It also supports the double buffering mechanism used by Android. This can 
+avoid frame misses found in previous Android framebuffer VNC servers.

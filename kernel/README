@@ -1,0 +1,53 @@
+VNC Keyboard driver for Android
+===============================
+
+The VNC keyboard driver is an emulated keyboard for the VNC server
+to send keyboard events to Android framework.
+
+It is useful if the keypad driver doesn't support a full keyboard. 
+Without the driver, VNC can only send the keys available on the keypad. 
+This driver allows VNC server to use the full range of keys for the
+VNC client.
+
+INSTALLATION
+===================
+To install the driver to an Android platform, one can add the source file
+vnckbd.c to 
+
+    kernel/drivers/input/keyboard
+    
+and modify Kconfig and Makefile there according to the instructions in
+the local files:
+
+	Kconfig
+	Makefile
+
+Configure and build the kernel as usual:
+
+	$ make menuconfig
+	
+	Go to menu: 
+		Device Drivers ->
+			Input device support ->
+				 Keyboards ->
+	Select:
+		VNC keyboard driver
+		VNC keyboard input device
+
+This should enable the following options in .config	
+	CONFIG_KEYBOARD_VNC
+	CONFIG_KEYBOARD_VNC_SELF
+
+After configuration, build and load the new kernel. There should be
+a new input device /dev/input/event<N>. It can be checked by the command:
+
+	$ cat /proc/bus/input/devices
+	
+I: Bus=0019 Vendor=0001 Product=0001 Version=0100
+N: Name="VNC keyboard"
+P: Phys=vnckbd/input0
+S: Sysfs=/devices/platform/vnc-keyboard/input/input0
+U: Uniq=
+H: Handlers=kbd event0 cpufreq 
+B: EV=3
+
